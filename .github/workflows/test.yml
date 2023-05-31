@@ -43,3 +43,11 @@ jobs:
         bazelisk test //... \
           --config=rbe-${{ matrix.bazel_otp_name }} \
           --verbose_failures
+  summary:
+    needs:
+    - test
+    runs-on: ubuntu-latest
+    steps:
+    - name: SUMMARY
+      run: |
+        echo "SUCCESS"
