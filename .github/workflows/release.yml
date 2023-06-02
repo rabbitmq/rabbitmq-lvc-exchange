@@ -77,10 +77,6 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         path: artifacts
-    - name: DEBUG
-      working-directory: artifacts
-      run: |
-        tree $PWD
     - name: CREATE RELEASE
       id: create-release
       uses: ncipollo/release-action@v1.12.0
