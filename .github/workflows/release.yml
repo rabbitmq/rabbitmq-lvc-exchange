@@ -69,16 +69,18 @@ jobs:
       id: rmq-version
       run: |
         sudo npm install --global --silent @bazel/buildozer
-        rmq_urls="$(cat vmware-rabbitmq/MODULE.bazel | buildozer 'print urls' -:%archive_override)"
+        rmq_urls="$(cat MODULE.bazel | buildozer 'print urls' -:%archive_override)"
         echo "rmq_urls=${rmq_urls}" | tee $GITHUB_OUTPUT
     - name: DOWNLOAD OTP 25 EZ
       uses: actions/download-artifact@v3
       with:
         name: rabbitmq_lvc_exchange-${{ github.ref_name }}-otp-25.ez
+        path: rabbitmq_lvc_exchange-${{ github.ref_name }}-otp-25.ez
     - name: DOWNLOAD OTP 26 EZ
       uses: actions/download-artifact@v3
       with:
         name: rabbitmq_lvc_exchange-${{ github.ref_name }}-otp-26.ez
+        path: rabbitmq_lvc_exchange-${{ github.ref_name }}-otp-26.ez
     - name: DEBUG
       run: |
         tree $PWD
