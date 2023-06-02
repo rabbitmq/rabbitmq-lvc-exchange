@@ -89,7 +89,7 @@ jobs:
         draft: true
         artifactErrorsFailBuild: true
         updateOnlyUnreleased: true
-        artifacts: artifacts/rabbitmq_lvc_exchange-*.ez
+        artifacts: artifacts/*/rabbitmq_lvc_exchange-*.ez
         body: |
           rabbitmq_lvc_exchange ${{ github.ref_name }}
 
