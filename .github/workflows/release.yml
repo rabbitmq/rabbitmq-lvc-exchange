@@ -79,6 +79,9 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: rabbitmq_lvc_exchange-${{ github.ref_name }}-otp-26.ez
+    - name: DEBUG
+      run: |
+        tree $PWD
     - name: CREATE RELEASE
       id: create-release
       uses: ncipollo/release-action@v1.12.0
