@@ -68,7 +68,7 @@ jobs:
       run: |
         path="rabbitmq_lvc_exchange-${{ steps.versions.outputs.plugin_version }}.ez"
         echo "path=${path}" | tee $GITHUB_OUTPUT
-        cp bazel-bin/rabbitmq-lvc-exchange.ez ${path}
+        cp bazel-bin/rabbitmq_lvc_exchange.ez ${path}
     - name: UPLOAD EZ
       uses: actions/upload-artifact@v3.1.2
       with:
