@@ -48,15 +48,17 @@ jobs:
         bazelisk build :ez \
           --config=rbe-${{ matrix.bazel_otp_name }} \
           --verbose_failures
-    - name: RESOLVE ARTIFACT PATH
-      id: resolve
+    - name: RENAME ARTIFACT
+      id: artifact
       run: |
-        echo "bazel_bin_path=$(bazel info bazel-bin)" | tee $GITHUB_OUTPUT
+        path="rabbitmq_lvc_exchange-${{ github.ref_name }}-otp-${{ matrix.bazel_otp_name }}.ez"
+        echo "path=${path}" | tee $GITHUB_OUTPUT
+        cp bazel-bin/rabbitmq-lvc-exchange.ez ${path}
     - name: UPLOAD EZ
       uses: actions/upload-artifact@v3.1.2
       with:
-        name: rabbitmq_lvc_exchange-${{ github.ref_name }}-otp-${{ matrix.bazel_otp_name }}.ez
-        path: ${{ steps.resolve.outputs.bazel_bin_path }}/rabbitmq-lvc-exchange.ez
+        name: ${{ steps.artifact.outputs.path }}
+        path: ${{ steps.artifact.outputs.path }}
         if-no-files-found: error
 
   release:
@@ -71,17 +73,12 @@ jobs:
         sudo npm install --global --silent @bazel/buildozer
         rmq_urls="$(cat MODULE.bazel | buildozer 'print urls' -:%archive_override)"
         echo "rmq_urls=${rmq_urls}" | tee $GITHUB_OUTPUT
-    - name: DOWNLOAD OTP 25 EZ
+    - name: DOWNLOAD EZs
       uses: actions/download-artifact@v3
       with:
-        name: rabbitmq_lvc_exchange-${{ github.ref_name }}-otp-25.ez
-        path: rabbitmq_lvc_exchange-${{ github.ref_name }}-otp-25.ez
-    - name: DOWNLOAD OTP 26 EZ
-      uses: actions/download-artifact@v3
-      with:
-        name: rabbitmq_lvc_exchange-${{ github.ref_name }}-otp-26.ez
-        path: rabbitmq_lvc_exchange-${{ github.ref_name }}-otp-26.ez
+        path: artifacts
     - name: DEBUG
+      working-directory: artifacts
       run: |
         tree $PWD
     - name: CREATE RELEASE
@@ -92,7 +89,7 @@ jobs:
         draft: true
         artifactErrorsFailBuild: true
         updateOnlyUnreleased: true
-        artifacts: rabbitmq_lvc_exchange-*.ez
+        artifacts: artifacts/rabbitmq_lvc_exchange-*.ez
         body: |
           rabbitmq_lvc_exchange ${{ github.ref_name }}
 
