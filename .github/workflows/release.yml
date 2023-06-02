@@ -19,7 +19,7 @@ jobs:
         sudo npm install --global --silent @bazel/buildozer
 
         plugin_version="$(cat MODULE.bazel | buildozer 'print version' -:%module)"
-        echo "plugin_version=${plugin_version}" | tee $GITHUB_OUTPUT
+        echo "plugin_version=${plugin_version}" | tee -a $GITHUB_OUTPUT
 
         tag_version="${REF_NAME#v}"
 
@@ -29,7 +29,7 @@ jobs:
         fi
 
         rmq_urls="$(cat MODULE.bazel | buildozer 'print urls' -:%archive_override)"
-        echo "rmq_urls=${rmq_urls}" | tee $GITHUB_OUTPUT
+        echo "rmq_urls=${rmq_urls}" | tee -a $GITHUB_OUTPUT
     - name: MOUNT BAZEL CACHE
       uses: actions/cache@v3.3.1
       with:
@@ -67,7 +67,7 @@ jobs:
       id: artifact
       run: |
         path="rabbitmq_lvc_exchange-${{ steps.versions.outputs.plugin_version }}.ez"
-        echo "path=${path}" | tee $GITHUB_OUTPUT
+        echo "path=${path}" | tee -a $GITHUB_OUTPUT
         cp bazel-bin/rabbitmq_lvc_exchange.ez ${path}
     - name: UPLOAD EZ
       uses: actions/upload-artifact@v3.1.2
@@ -87,4 +87,4 @@ jobs:
         body: |
           rabbitmq_lvc_exchange ${{ github.ref_name }}
 
-          Built against rabbitmq-server ${{ steps.rmq-version.outputs.rmq_urls }}
+          Built against rabbitmq-server ${{ steps.versions.outputs.rmq_urls }}
