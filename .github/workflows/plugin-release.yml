@@ -60,7 +60,7 @@ jobs:
       id: load-info
       run: |
         bazelisk build @rabbitmq-server//:otp_version \
-          --config=rbe-${BAZEL_OTP_NAME}
+          --config=rbe-${{ inputs.bazel_otp_name }}
         echo "otp=$(cat bazel-bin/external/rabbitmq-server~override/otp_version.txt)" | tee -a $GITHUB_OUTPUT
     - name: TEST
       run: |
