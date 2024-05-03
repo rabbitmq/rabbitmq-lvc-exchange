@@ -1,11 +1,11 @@
 PROJECT = rabbitmq_lvc_exchange
 PROJECT_DESCRIPTION = RabbitMQ Last Value Cache exchange
 
-RABBITMQ_VERSION ?= v3.12.x
+RABBITMQ_VERSION ?= v3.13.x
 current_rmq_ref = $(RABBITMQ_VERSION)
 
 define PROJECT_APP_EXTRA_KEYS
-	{broker_version_requirements, ["3.12.0"]}
+	{broker_version_requirements, ["3.13.0"]}
 endef
 
 dep_amqp_client                = git_rmq-subfolder rabbitmq-erlang-client $(RABBITMQ_VERSION)

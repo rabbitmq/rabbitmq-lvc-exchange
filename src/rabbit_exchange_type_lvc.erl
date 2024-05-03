@@ -10,7 +10,7 @@
 
 -behaviour(rabbit_exchange_type).
 
--export([description/0, serialise_events/0, route/2]).
+-export([description/0, serialise_events/0, route/3]).
 -export([validate/1, validate_binding/2,
          create/2, recover/2, delete/2, policy_changed/2,
          add_binding/3, remove_bindings/3, assert_args_equivalence/2]).
@@ -25,13 +25,8 @@ description() ->
 
 serialise_events() -> false.
 
-route(#exchange{name = Name},
-      #delivery{message = Msg}) ->
-    #basic_message{routing_keys = RKs} = Msg,
-    Keys = case RKs of
-               CC when is_list(CC) -> CC;
-               To                 -> [To]
-           end,
+route(#exchange{name = Name}, Msg, _Opts) ->
+    RKs = mc:routing_keys(Msg),
     rabbit_mnesia:execute_mnesia_transaction(
       fun () ->
               [mnesia:write(?LVC_TABLE,
@@ -39,7 +34,7 @@ route(#exchange{name = Name},
                                                     routing_key=K},
                                     content = Msg},
                             write) ||
-               K <- Keys]
+               K <- RKs]
       end),
     rabbit_router:match_routing_key(Name, RKs).
 
