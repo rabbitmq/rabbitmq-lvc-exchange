@@ -83,7 +83,7 @@ insert_in_khepri(XName, RKs, Msg) ->
 delete() ->
     rabbit_khepri:handle_fallback(
         #{mnesia => fun() -> _ = mnesia:delete_table(?LVC_TABLE), ok end,
-          khepri => fun() -> _ = rabbit_khepri:delete([rabbit_exchange_type_lvc]), ok end}
+          khepri => fun() -> _ = rabbit_khepri:delete(khepri_lvc_path()), ok end}
     ).
 
 delete(Exchange) ->
