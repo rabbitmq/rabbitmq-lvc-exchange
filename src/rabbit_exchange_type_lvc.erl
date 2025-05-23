@@ -5,9 +5,7 @@
 %% Copyright (c) 2007-2012 VMware, Inc.  All rights reserved.
 -module(rabbit_exchange_type_lvc).
 -include_lib("rabbit_common/include/rabbit.hrl").
--include_lib("rabbit/include/amqqueue.hrl").
 -include_lib("rabbit/include/mc.hrl").
--include("rabbit_lvc_plugin.hrl").
 
 -behaviour(rabbit_exchange_type).
 
@@ -28,15 +26,7 @@ serialise_events() -> false.
 
 route(#exchange{name = Name}, Msg, _Opts) ->
     RKs = mc:routing_keys(Msg),
-    rabbit_mnesia:execute_mnesia_transaction(
-      fun () ->
-              [mnesia:write(?LVC_TABLE,
-                            #cached{key = #cachekey{exchange=Name,
-                                                    routing_key=K},
-                                    content = Msg},
-                            write) ||
-               K <- RKs]
-      end),
+    rabbit_db_lvc_exchange:insert(Name, RKs, Msg),
     rabbit_router:match_routing_key(Name, RKs).
 
 validate(_X) -> ok.
@@ -44,19 +34,8 @@ validate_binding(_X, _B) -> ok.
 create(_Serial, _X) -> ok.
 recover(_X, _Bs) -> ok.
 
-delete(none, #exchange{ name = Name }) ->
-    rabbit_mnesia:execute_mnesia_transaction(
-      fun() ->
-              [mnesia:delete(?LVC_TABLE, K, write) ||
-               #cached{ key = K } <-
-               mnesia:match_object(?LVC_TABLE,
-                                   #cached{key = #cachekey{
-                                                    exchange = Name, _ = '_' },
-                                           _ = '_'}, write)]
-      end),
-    ok;
-delete(_Serial, _X) ->
-	ok.
+delete(_Serial, Exchange) ->
+    rabbit_db_lvc_exchange:delete(Exchange).
 
 policy_changed(_X1, _X2) -> ok.
 
@@ -71,7 +50,8 @@ add_binding(none,
                 case get_msg_from_cache(XName, RoutingKey) of
                     not_found ->
                         ok;
-                    Msg ->
+                    Msg0 ->
+                        Msg = mc:set_annotation(?ANN_ROUTING_KEYS, [RoutingKey], Msg0),
                         rabbit_queue_type:deliver([Q], Msg, #{}, stateless)
                 end
         end,
@@ -87,7 +67,8 @@ add_binding(none,
                 case get_msg_from_cache(XName, RoutingKey) of
                     not_found ->
                         ok;
-                    Msg ->
+                    Msg0 ->
+                        Msg = mc:set_annotation(?ANN_ROUTING_KEYS, [RoutingKey], Msg0),
                         rabbit_queue_type:publish_at_most_once(X, Msg)
                 end
         end,
@@ -103,15 +84,7 @@ assert_args_equivalence(X, Args) ->
 -spec get_msg_from_cache(rabbit_types:exchange_name(),
                          rabbit_types:routing_key()) -> mc:state() | not_found.
 get_msg_from_cache(XName, RoutingKey) ->
-    case mnesia:dirty_read(
-           ?LVC_TABLE,
-           #cachekey{exchange = XName,
-                     routing_key = RoutingKey }) of
-        [] ->
-            not_found;
-        [#cached{content = Msg}] ->
-            mc:set_annotation(?ANN_ROUTING_KEYS, [RoutingKey], Msg)
-    end.
+    rabbit_db_lvc_exchange:get(XName, RoutingKey).
 
 -spec destination_not_found_error(rabbit_types:r('exchange' | 'queue')) -> no_return().
 destination_not_found_error(DestName) ->

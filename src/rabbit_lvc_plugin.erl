@@ -20,17 +20,8 @@
 %% private
 
 setup_schema() ->
-    _ = mnesia:create_table(?LVC_TABLE,
-                            [{attributes, record_info(fields, cached)},
-                             {record_name, cached},
-                             {type, set},
-                             {disc_copies, [node()]}]),
-    _ = mnesia:add_table_copy(?LVC_TABLE, node(), disc_copies),
-    rabbit_table:wait([?LVC_TABLE]),
-    ok.
-
+    rabbit_db_lvc_exchange:setup_schema().
 
 disable_plugin() ->
     rabbit_registry:unregister(exchange, <<"x-lvc">>),
-    _ = mnesia:delete_table(?LVC_TABLE),
-    ok.
+    rabbit_db_lvc_exchange:delete().

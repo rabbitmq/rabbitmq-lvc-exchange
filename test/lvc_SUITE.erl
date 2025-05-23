@@ -23,7 +23,8 @@ groups() ->
      {non_parallel_tests, [], [
                                lvc,
                                lvc_bind_fanout_exchange,
-                               lvc_bind_direct_exchange
+                               lvc_bind_direct_exchange,
+                               mnesia_to_khepri
                               ]}
     ].
 
@@ -113,6 +114,18 @@ lvc_bind_direct_exchange(Config) ->
     exchange_delete(Ch, X),
     rabbit_ct_client_helpers:close_channel(Ch).
 
+mnesia_to_khepri(Config) ->
+    Ch = rabbit_ct_client_helpers:open_channel(Config),
+    LvcX = <<"test-lvc-exchange">>,
+    RK = <<"key1">>,
+    Payload = <<"Hello">>,
+    exchange_declare(Ch, LvcX),
+    publish(Ch, LvcX, RK, Payload),
+    khepri_enable(Config),
+    Q1 = queue_declare(Ch),
+    bind(Ch, LvcX, RK, Q1),
+    expect(Ch, Q1, Payload).
+
 
 %% -------------------------------------------------------------------
 %% Helpers
@@ -160,3 +173,6 @@ exchange_bind(Ch, D, RK, S) ->
     amqp_channel:call(Ch, #'exchange.bind'{source       = S,
                                            destination  = D,
                                            routing_key  = RK}).
+
+khepri_enable(Config) ->
+    rabbit_ct_broker_helpers:enable_feature_flag(Config, khepri_db).
