@@ -83,7 +83,7 @@ delete_from_khepri(?LVC_TABLE = Table, #cachekey{exchange = Key, routing_key = R
       end, State).
 
 clear_data_in_khepri(?LVC_TABLE) ->
-    case rabbit_khepri:delete([rabbit_exchange_type_lvc]) of
+    case rabbit_khepri:delete(rabbit_db_lvc_exchange:khepri_lvc_path()) of
         ok ->
             ok;
         Error ->

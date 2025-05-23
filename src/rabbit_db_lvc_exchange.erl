@@ -11,7 +11,9 @@
          delete/1
         ]).
 
--export([khepri_lvc_path/1, khepri_lvc_path/2]).
+-export([khepri_lvc_path/0,
+         khepri_lvc_path/1,
+         khepri_lvc_path/2]).
 
 -rabbit_mnesia_tables_to_khepri_db(
    [{?LVC_TABLE, rabbit_lvc_plugin_m2k_converter}]).
