@@ -1,3 +1,8 @@
+%% This Source Code Form is subject to the terms of the Mozilla Public
+%% License, v. 2.0. If a copy of the MPL was not distributed with this
+%% file, You can obtain one at https://mozilla.org/MPL/2.0/.
+%%
+%% Copyright (c) 2007-2012 VMware, Inc.  All rights reserved.
 -module(rabbit_db_lvc_exchange).
 
 -include_lib("rabbit_common/include/rabbit.hrl").
@@ -16,7 +21,7 @@
          khepri_lvc_path/2]).
 
 -rabbit_mnesia_tables_to_khepri_db(
-   [{?LVC_TABLE, rabbit_lvc_plugin_m2k_converter}]).
+   [{?LVC_TABLE, rabbit_lvc_m2k_converter}]).
 
 setup_schema() ->
     rabbit_khepri:handle_fallback(

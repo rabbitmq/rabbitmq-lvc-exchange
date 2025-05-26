@@ -121,7 +121,7 @@ mnesia_to_khepri(Config) ->
     Payload = <<"Hello">>,
     exchange_declare(Ch, LvcX),
     publish(Ch, LvcX, RK, Payload),
-    khepri_enable(Config),
+    enable_khepri(Config),
     Q1 = queue_declare(Ch),
     bind(Ch, LvcX, RK, Q1),
     expect(Ch, Q1, Payload).
@@ -174,5 +174,5 @@ exchange_bind(Ch, D, RK, S) ->
                                            destination  = D,
                                            routing_key  = RK}).
 
-khepri_enable(Config) ->
+enable_khepri(Config) ->
     rabbit_ct_broker_helpers:enable_feature_flag(Config, khepri_db).
