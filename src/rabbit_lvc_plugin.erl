@@ -2,7 +2,8 @@
 %% License, v. 2.0. If a copy of the MPL was not distributed with this
 %% file, You can obtain one at https://mozilla.org/MPL/2.0/.
 %%
-%% Copyright (c) 2007-2012 VMware, Inc.  All rights reserved.
+%% Copyright (c) 2007-2025 Broadcom. All Rights Reserved. The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries. All rights reserved.
+%%
 -module(rabbit_lvc_plugin).
 
 -include("rabbit_lvc_plugin.hrl").
@@ -20,17 +21,8 @@
 %% private
 
 setup_schema() ->
-    _ = mnesia:create_table(?LVC_TABLE,
-                            [{attributes, record_info(fields, cached)},
-                             {record_name, cached},
-                             {type, set},
-                             {disc_copies, [node()]}]),
-    _ = mnesia:add_table_copy(?LVC_TABLE, node(), disc_copies),
-    rabbit_table:wait([?LVC_TABLE]),
-    ok.
-
+    rabbit_db_lvc_exchange:setup_schema().
 
 disable_plugin() ->
     rabbit_registry:unregister(exchange, <<"x-lvc">>),
-    _ = mnesia:delete_table(?LVC_TABLE),
-    ok.
+    rabbit_db_lvc_exchange:delete().
